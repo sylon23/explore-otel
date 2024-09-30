@@ -1,0 +1,42 @@
+- Install cert manager
+    - helm repo add jetstack https://charts.jetstack.io --force-update
+    - helm install \
+        cert-manager jetstack/cert-manager \
+        --namespace cert-manager \
+        --create-namespace \
+        --version v1.15.3 \
+        --set crds.enabled=true
+
+- Install the open telemetry operator
+    kubectl apply -f opentelemetry-operator.yaml
+    kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+
+- Deploy the otel collector -
+    - kubectl apply collector.yaml
+
+- Annotate existing nodejs pods
+    - kubectl annotate deployment node8-labs instrumentation.opentelemetry.io/inject-nodejs="true" --overwrite
+    - kubectl rollout restart deployment node8-labs
+    - kubectl annotate pod node8-labs-797656969-wsxgv instrumentation.opentelemetry.io/inject-nodejs="true" --overwrite
+-    - kubectl patch deployment node8-labs -p '{"metadata":{"annotations":{"instrumentation.opentelemetry.io/inject-nodejs":"true"}}}'
+
+
+
+
+
+
+
+
+
+Related
+- kubectl port-forward sample-node-8cd99bb5-6jr6g 3006:8080
+- http://localhost:3006/rolldice?rolls=100
+
+
+chat gpt - https://chatgpt.com/c/66f43a44-09bc-8012-8ee4-5543a85e17c0
+//sample obsv test
+curl 10.31.3.175:30081/
+   86  curl 10.31.3.175:30081/error
+   87  curl 10.31.3.175:30081/health
+   88  curl 10.31.2.235:30081/org/[1001-2000]
+   89  curl 10.31.3.175:30081/org/[1001-2000]

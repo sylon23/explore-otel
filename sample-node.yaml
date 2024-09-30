@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample-node
+  labels:
+    name: sample-node
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 38080
+      nodePort: 30086
+  selector:
+    name: sample-node
+   
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: sample-node
+  name: sample-node
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: sample-node
+  template:
+    metadata:
+      annotations:  # Move annotations here
+        instrumentation.opentelemetry.io/inject-nodejs: "true"
+      labels:
+        name: sample-node
+    spec:
+      containers:
+      - env:
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        name: sample-node
+        image:  sylon/sample-node-app:v1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+
